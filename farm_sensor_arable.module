@@ -3,3 +3,31 @@
  * @file
  * Code for the Farm Sensor Arable module.
  */
+
+/**
+ * Implements hook_permission().
+ */
+function farm_sensor_arable_permission() {
+  return array(
+    'configure arable settings' => array(
+      'title' => 'Configure Arable settings',
+    ),
+  );
+}
+
+/**
+ * Implements hook_farm_access_perms().
+ */
+function farm_sensor_arable_farm_access_perms($role) {
+  $perms = array();
+
+  // Load the list of farm roles.
+  $roles = farm_access_roles();
+
+  // If this role has 'config' access, allow them to configure arable settings.
+  if (!empty($roles[$role]['access']['config'])) {
+    $perms[] = 'configure arable settings';
+  }
+
+  return $perms;
+}

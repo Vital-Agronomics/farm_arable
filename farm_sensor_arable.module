@@ -31,3 +31,37 @@ function farm_sensor_arable_farm_access_perms($role) {
 
   return $perms;
 }
+
+/**
+ * Implements hook_menu().
+ */
+function farm_sensor_arable_menu() {
+
+  // Arable configuration form.
+  $items['admin/config/farm/arable'] = array(
+    'title' => 'Arable',
+    'description' => 'Arable configuration settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('farm_sensor_arable_settings_form'),
+    'access arguments' => array('configure arable settings'),
+  );
+
+  return $items;
+}
+
+/*
+ * Configuration settings for Arable Sensor module.
+ */
+function farm_sensor_arable_settings_form($form, &$form_state) {
+
+  // Default Arable API key.
+  $form['farm_sensor_arable_default_api_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default Arable API key'),
+    '#description' => t('The default API key used when creating Arable sensor assets.'),
+    '#default_value' => variable_get('farm_sensor_arable_default_api_key', ''),
+    '#maxlength' => NULL,
+  );
+
+  return system_settings_form($form);
+}

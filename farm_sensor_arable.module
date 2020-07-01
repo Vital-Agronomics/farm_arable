@@ -256,6 +256,85 @@ function farm_sensor_arable_sensor_settings_device_info_ajax($form, &$form_state
 }
 
 /**
+ * Implements hook_entity_view_alter().
+ */
+function farm_sensor_arable_entity_view_alter(&$build, $type)
+{
+
+  /*
+   * Alter arable sensor asset page to display device status.
+   */
+
+  // If it's not a farm_asset, bail.
+  if ($type != 'farm_asset') {
+    return;
+  }
+
+  // If the entity information isn't available, bail.
+  if (empty($build['#entity'])) {
+    return;
+  }
+  $asset = $build['#entity'];
+
+  // If the sensor is not an arable, bail.
+  if (empty($asset->sensor_type) || $asset->sensor_type != 'arable') {
+    return;
+  }
+
+  // Load api key.
+  $api_key = NULL;
+  if (!empty($asset->sensor_settings['api_key'])) {
+    $api_key = $asset->sensor_settings['api_key'];
+  }
+
+  // Load device name.
+  $device_name = NULL;
+  if (!empty($asset->sensor_settings['device']['name'])) {
+    $device_name = $asset->sensor_settings['device']['name'];
+  }
+
+  // Properties to load from the device.
+  $device_properties = array(
+    'state' => 'State',
+    'signal_strength' => 'Signal Strength',
+    'last_post' => 'Last Post',
+    'last_seen' => 'Last Seen',
+    'batt_pct' => 'Battery Percentage',
+    'batt_volt' => 'Battery Voltage',
+  );
+
+  // Device info text.
+  $markup = '<strong>Sensor Status: Not configured!</strong>';
+
+  // Load device info if sensor is configured.
+  if (!empty($api_key) && !empty($device_name)) {
+
+    // Load device info.
+    $device = farm_sensor_arable_device_info($api_key, $device_name);
+
+    // If info was returned..
+    if (!empty($device)) {
+
+      // Build array of info.
+      $info = array();
+      foreach($device_properties as $key => $label) {
+        $value = isset($device[$key]) ? $device[$key] : 'Unknown';
+        $info[] = '<li><strong>' . $label . ':</strong> ' . $value . '</li>';
+      }
+
+      // Update markup.
+      $markup = '<strong>Device Status</strong><br /><ul>' . implode("", $info) . ' </ul>';
+    }
+  }
+
+  // Output the markup.
+  $build['device_status'] = array(
+    '#markup' => $markup,
+    '#weight' => 10,
+  );
+}
+
+/**
  * Helper function to load info associated with one
  * Arable device.
  *

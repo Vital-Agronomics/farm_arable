@@ -65,3 +65,263 @@ function farm_sensor_arable_settings_form($form, &$form_state) {
 
   return system_settings_form($form);
 }
+
+/**
+ * Implements hook_farm_sensor_type_info().
+ */
+function farm_sensor_arable_farm_sensor_type_info() {
+  return array(
+    'arable' => array(
+      'label' => t('Arable'),
+      'description' => t('Integrate with Arable Mark sensors'),
+      'form' => 'farm_sensor_arable_sensor_settings_form',
+    ),
+  );
+}
+
+/**
+ * Settings form for listener sensor.
+ *
+ * @param FarmAsset $sensor
+ *   The sensor asset entity.
+ * @param array $settings
+ *   The farm sensor settings.
+ *
+ * @return array
+ *   Returns a form with settings for this  Listener sensor.
+ */
+function farm_sensor_arable_sensor_settings_form($sensor, $settings = array()) {
+
+  // Build array of default values.
+  $defaults = array(
+    'api_key' => variable_get('farm_sensor_arable_default_api_key', ''),
+    'name' => NULL,
+    'type' => NULL,
+    'model' => NULL,
+    'id' => NULL,
+  );
+
+  // If the sensor asset already exists, use it's saved api key.
+  if (!empty($sensor->id)) {
+    // Update default API key.
+    $defaults['api_key'] = $settings['api_key'];
+
+    // Update default device info.
+    $defaults['name'] = $settings['device']['name'];
+    $defaults['type'] = $settings['device']['type'];
+    $defaults['model'] = $settings['device']['model'];
+    $defaults['id'] = $settings['device']['id'];
+  }
+
+  // Arable API key.
+  $form['api_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Arable API key'),
+    '#description' => t('Arable API key with read access to devices.'),
+    '#default_value' => $defaults['api_key'],
+    '#maxlength' => NULL,
+    '#required' => TRUE,
+    '#ajax' => array(
+      'callback' => 'farm_sensor_arable_sensor_settings_api_key_ajax',
+      'wrapper' => 'device-info'
+    ),
+  );
+
+  $form['api_key_message'] = array(
+    '#prefix' => '<h4>',
+    '#suffix' => '</h4>',
+  );
+
+  // Build a list of device options.
+  $device_options = array();
+  if (!empty($defaults['api_key'])) {
+
+    // Load devices the api key has access to.
+    $available_devices = farm_sensor_arable_available_devices($form['api_key']['#default_value']);
+
+    // Build array of options.
+    foreach($available_devices as $device) {
+      if (!isset($device->name)) {
+        continue;
+      }
+      $device_options[$device->name] = $device->name;
+    }
+  }
+
+  // Add a container around the device fields.
+  $form['device'] = array(
+    '#prefix' => '<div id="device-info">',
+    '#suffix' => '</div>',
+  );
+
+  $form['device']['name'] = array(
+    '#type' => 'select',
+    '#title' => t('Device Name'),
+    '#options' => $device_options,
+    '#empty_option' => t('Select a device'),
+    '#default_value' => $defaults['name'],
+    '#required' => TRUE,
+    '#ajax' => array(
+      'callback' => 'farm_sensor_arable_sensor_settings_device_info_ajax',
+      'wrapper' => 'device-info'
+    ),
+  );
+
+  $form['device']['type'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Type'),
+    '#default_value' => $defaults['type'],
+    '#attributes' => array('readonly' => 'readonly'),
+    '#required' => TRUE,
+  );
+
+  $form['device']['model'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Model'),
+    '#default_value' => $defaults['model'],
+    '#attributes' => array('readonly' => 'readonly'),
+    '#required' => TRUE,
+  );
+
+  $form['device']['id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Device ID'),
+    '#default_value' => $defaults['id'],
+    '#attributes' => array('readonly' => 'readonly'),
+    '#required' => TRUE,
+  );
+
+  return $form;
+}
+
+/**
+ * AJAX callback for sensor settings form API key.
+ */
+function farm_sensor_arable_sensor_settings_api_key_ajax($form, &$form_state) {
+
+  // Save api key.
+  $api_key = $form_state['values']['sensor_settings']['api_key'];
+
+  // Build array of device options.
+  $device_options = array();
+  if (!empty($api_key)) {
+
+    // Load available devices.
+    $available_devices = farm_sensor_arable_available_devices($api_key);
+
+    foreach($available_devices as $device) {
+      if (!isset($device->name)) {
+        continue;
+      }
+      $device_options[$device->name] = $device->name;
+    }
+  }
+
+  // Update device options and reset current selection.
+  $form['sensor']['sensor_settings']['device']['name']['#options'] = $device_options;
+  $form['sensor']['sensor_settings']['device']['name']['#value'] = NULL;
+
+  // Blank out device property fields.
+  $device_properties = array('type', 'model', 'id');
+  foreach($device_properties as $prop) {
+    $form['sensor']['sensor_settings']['device'][$prop]['#value'] = '';
+  }
+
+  return $form['sensor']['sensor_settings']['device'];
+}
+
+/**
+ * AJAX callback for sensor settings device info.
+ */
+function farm_sensor_arable_sensor_settings_device_info_ajax($form, &$form_state) {
+
+  // Save api key and device name.
+  $api_key = $form_state['values']['sensor_settings']['api_key'];
+  $device_name = $form_state['values']['sensor_settings']['device']['name'];
+
+  // Load device info.
+  $device_info = array();
+  if (!empty($api_key) && !empty($device_name)) {
+    $device_info = farm_sensor_arable_device_info($api_key, $device_name);
+  }
+
+  // Update device property fields.
+  $device_properties = array('type', 'model', 'id');
+  foreach($device_properties as $prop) {
+    $form['sensor']['sensor_settings']['device'][$prop]['#value'] = !empty($device_info[$prop]) ? $device_info[$prop] : '';
+  }
+
+  // Return the device fields.
+  return $form['sensor']['sensor_settings']['device'];
+}
+
+/**
+ * Helper function to load info associated with one
+ * Arable device.
+ *
+ * @param $api_key
+ *   Arable API key to use when loading devices.
+ * @param $device_name
+ *   Arable Device name to load.
+ * @return array
+ *   Array of objects returned from Arable API.
+ */
+function farm_sensor_arable_device_info($api_key, $device_name) {
+
+  // Build request to Arable v2 API.
+  $url = 'https://api.arable.cloud/api/v2/devices/' . $device_name;
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Authorization' => 'Apikey ' . $api_key,
+    ),
+  );
+
+  $response = drupal_http_request($url, $options);
+  $data = json_decode($response->data);
+
+  if (is_object($data)) {
+    return get_object_vars($data);
+  }
+
+  return NULL;
+}
+
+/**
+ * Helper function to load all Arable devices an
+ * API key has access to.
+ *
+ * @param $api_key
+ *   Arable API key to use when loading devices.
+ * @return array
+ *   Array of objects returned from Arable API.
+ */
+function farm_sensor_arable_available_devices($api_key) {
+
+  // Return empty array if no api key is provided.
+  if (empty($api_key)) {
+    return array();
+  }
+
+  // Build request to Arable v2 API.
+  $url = 'https://api.arable.cloud/api/v2/devices';
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Authorization' => 'Apikey ' . $api_key,
+    ),
+  );
+
+  $response = drupal_http_request($url, $options);
+  $data = json_decode($response->data);
+
+  // Return response items.
+  if (isset($data->items)) {
+    return $data->items;
+  }
+
+  // Return empty array on error.
+  return array();
+}

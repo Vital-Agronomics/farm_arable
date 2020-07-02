@@ -404,3 +404,40 @@ function farm_sensor_arable_available_devices($api_key) {
   // Return empty array on error.
   return array();
 }
+
+/**
+ * Helper function to load Arable device stats.
+ *
+ * @param $api_key
+ *   Arable API key to use.
+ * @return object
+ *   Stats returned from the Arable API.
+ */
+function farm_sensor_arable_device_stats($api_key) {
+
+  // Return empty array if no api key is provided.
+  if (empty($api_key)) {
+    return NULL;
+  }
+
+  // Build request to Arable v2 API.
+  $url = 'https://api.arable.cloud/api/v2/devices/stats';
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Authorization' => 'Apikey ' . $api_key,
+    ),
+  );
+
+  $response = drupal_http_request($url, $options);
+  $data = json_decode($response->data);
+
+  // Return response stats.
+  if (isset($data->state)) {
+    return $data;
+  }
+
+  // Return empty array on error.
+  return NULL;
+}

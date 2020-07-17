@@ -387,6 +387,52 @@ function farm_sensor_arable_device_data($api_key, $device_name, $table, $params 
 }
 
 /**
+ * Helper function to load data table schema info.
+ *
+ * @param $api_key
+ *    Arable API key to use with request.
+ * @param $table
+ *    Data table name (daily, hourly, etc).
+ * @return array
+ *    Array of schema info.
+ */
+function farm_sensor_arable_data_schema($api_key, $table) {
+
+  // Bail if not enough info is provided.
+  if (empty($api_key) || empty($table)) {
+    return array();
+  }
+
+  // Build request to Arable v2 api.
+  $url = url('https://api.arable.cloud/api/v2/schemas/' . $table);
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Authorization' => 'Apikey ' . $api_key,
+    ),
+  );
+
+  // Get response.
+  $response = drupal_http_request($url, $options);
+
+  // Check if response includes data.
+  if (isset($response->data)) {
+
+    // Get data.
+    $data = json_decode($response->data);
+
+    // Check if data is returned.
+    if (is_array($data)) {
+      return $data;
+    }
+  }
+
+  // Return empty array.
+  return array();
+}
+
+/**
  * Helper function to load info associated with one
  * Arable device.
  *

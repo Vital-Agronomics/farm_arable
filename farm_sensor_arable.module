@@ -335,6 +335,58 @@ function farm_sensor_arable_entity_view_alter(&$build, $type)
 }
 
 /**
+ * Helper function to load data from one arable device.
+ * @param $api_key
+ *    Arable API key to use with request.
+ * @param $device_name
+ *    Arable device name.
+ * @param $table
+ *    Data table name (daily, hourly, etc).
+ * @param $params
+ *    Additional params to include with API request.
+ * @return array|mixed
+ *    Array of data points returned from Arable API.
+ */
+function farm_sensor_arable_device_data($api_key, $device_name, $table, $params = array()) {
+
+  // Bail if not enough info is provided.
+  if (empty($api_key) || empty($table) || empty($device_name)) {
+    return array();
+  }
+
+  // Save device name to params.
+  $params['device'] = $device_name;
+
+  // Build request to Arable v2 api.
+  $url = url('https://api.arable.cloud/api/v2/data/' . $table, array('query' => $params));
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Authorization' => 'Apikey ' . $api_key,
+    ),
+  );
+
+  // Get response.
+  $response = drupal_http_request($url, $options);
+
+  // Check if response includes data.
+  if (isset($response->data)) {
+
+    // Get data.
+    $data = json_decode($response->data);
+
+    // Check if data is returned.
+    if (is_array($data)) {
+      return $data;
+    }
+  }
+
+  // Return empty array.
+  return array();
+}
+
+/**
  * Helper function to load info associated with one
  * Arable device.
  *

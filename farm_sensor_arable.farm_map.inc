@@ -14,3 +14,17 @@ function farm_sensor_arable_farm_map_behaviors() {
     ),
   );
 }
+
+/**
+ * Implements hook_farm_map_view().
+ */
+function farm_sensor_arable_farm_map_view($name, $element) {
+
+  // Add arable sensors to farm_areas maps.
+  if ($name == 'farm_areas') {
+
+    // Load all arable sensors.
+    $sensors = farm_sensor_arable_sensors();
+    farm_map_add_behavior('arable_current_status', array('devices' => $sensors));
+  }
+}

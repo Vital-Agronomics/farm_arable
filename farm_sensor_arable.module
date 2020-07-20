@@ -539,3 +539,25 @@ function farm_sensor_arable_device_stats($api_key) {
   // Return empty array on error.
   return NULL;
 }
+
+/**
+ * Helper function to load Arable Sensor Assets.
+ */
+function farm_sensor_arable_sensors() {
+
+  // Search the database for assets with matching names
+  $query = db_select('farm_asset', 'fa');
+  $query->fields('fa', array('id'));
+  $query->join('farm_sensor', 'fs', 'fa.id = fs.id');
+  $query->condition('fa.type', 'sensor', '=');
+  $query->condition('fa.archived', '0', '=');
+  $query->condition('fa.type', 'sensor', '=');
+
+  $query->condition('fs.type', 'arable', '=');
+
+  // Execute the query.
+  $result = $query->execute();
+  $ids = $result->fetchCol();
+
+  return farm_asset_load_multiple($ids);
+}

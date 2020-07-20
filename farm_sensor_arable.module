@@ -324,6 +324,9 @@ function farm_sensor_arable_entity_view_alter(&$build, $type)
 
       // Update markup.
       $markup = '<strong>Device Status</strong><br /><ul>' . implode("", $info) . ' </ul>';
+
+      // Add device info to JS
+      farm_map_add_behavior('arable_current_status', array('devices' => array($asset->id => $asset)));
     }
   }
 

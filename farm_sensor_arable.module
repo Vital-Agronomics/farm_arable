@@ -162,7 +162,9 @@ function farm_sensor_arable_sensor_settings_form($sensor, $settings = array()) {
       if (!isset($device->name)) {
         continue;
       }
-      $device_options[$device->name] = $device->name;
+      $device_name = $device->name;
+      $device_state = $device->state;
+      $device_options[$device->name] = "{$device_name} ({$device_state})";
     }
   }
 
@@ -234,7 +236,9 @@ function farm_sensor_arable_sensor_settings_api_key_ajax($form, &$form_state) {
       if (!isset($device->name)) {
         continue;
       }
-      $device_options[$device->name] = $device->name;
+      $device_name = $device->name;
+      $device_state = $device->state;
+      $device_options[$device->name] = "{$device_name} ({$device_state})";
     }
   }
 

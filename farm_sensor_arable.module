@@ -92,6 +92,24 @@ function farm_sensor_arable_farm_sensor_type_info() {
  */
 function farm_sensor_arable_sensor_settings_form($sensor, $settings = array()) {
 
+  // Load existing arable sensors.
+  $existing_sensors = farm_sensor_arable_sensors();
+
+  // Build list of existing names.
+  $existing_device_names = array();
+  foreach($existing_sensors as $asset) {
+    if (isset($asset->sensor_settings['device']['name'])) {
+      $existing_device_names[] = $asset->sensor_settings['device']['name'];
+    }
+  }
+  $existing_device_names = drupal_map_assoc($existing_device_names);
+
+  // Save existing device names.
+  $form['existing_device_names'] = array(
+    '#type' => 'value',
+    '#value' => $existing_device_names,
+  );
+
   // Build array of default values.
   $defaults = array(
     'api_key' => variable_get('farm_sensor_arable_default_api_key', ''),
@@ -147,6 +165,9 @@ function farm_sensor_arable_sensor_settings_form($sensor, $settings = array()) {
       $device_options[$device->name] = $device->name;
     }
   }
+
+  // Remove existing names from available options.
+  $device_options = array_diff_key($device_options, $existing_device_names);
 
   // Add a container around the device fields.
   $form['device'] = array(
@@ -216,6 +237,10 @@ function farm_sensor_arable_sensor_settings_api_key_ajax($form, &$form_state) {
       $device_options[$device->name] = $device->name;
     }
   }
+
+  // Remove existing names from available options.
+  $existing_device_names = $form_state['values']['sensor_settings']['existing_device_names'];
+  $device_options = array_diff_key($device_options, $existing_device_names);
 
   // Update device options and reset current selection.
   $form['sensor']['sensor_settings']['device']['name']['#options'] = $device_options;

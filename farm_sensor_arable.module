@@ -63,6 +63,61 @@ function farm_sensor_arable_settings_form($form, &$form_state) {
     '#maxlength' => NULL,
   );
 
+  // Units to use in API requests.
+  $form['units'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Units'),
+  );
+
+  // Load system of measurement.
+  $system = farm_quantity_system_of_measurement();
+  $metric = $system == 'metric';
+
+  // Build defaults based on system of measurement.
+  $default_units = array(
+    'temp' => $metric ? 'C' : 'F',
+    'pres' => 'mb',
+    'ratio' => 'pct',
+    'size' => $metric ? 'mm' : 'in',
+    'speed' => $metric ? 'kph' : 'mph',
+  );
+
+  // Temperature unit.
+  $form['units']['farm_sensor_arable_temp_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Temperature'),
+    '#options' => array('C' => 'Celsius', 'F' => 'Fahrenheit'),
+    '#default_value' => variable_get('farm_sensor_arable_temp_unit', $default_units['temp']),
+  );
+
+  $form['units']['farm_sensor_arable_pres_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Pressure'),
+    '#options' => array('mb' => 'Millibars', 'kp' => 'Kilopascals'),
+    '#default_value' => variable_get('farm_sensor_arable_pres_unit', $default_units['pres']),
+  );
+
+  $form['units']['farm_sensor_arable_ratio_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Ratio'),
+    '#options' => array('dec' => 'Decimal', 'pct' => 'Percent'),
+    '#default_value' => variable_get('farm_sensor_arable_ratio_unit', $default_units['ratio']),
+  );
+
+  $form['units']['farm_sensor_arable_size_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Size'),
+    '#options' => array('in' => 'Inches', 'mm' => 'Millimeters'),
+    '#default_value' => variable_get('farm_sensor_arable_size_unit', $default_units['size']),
+  );
+
+  $form['units']['farm_sensor_arable_speed_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Speed'),
+    '#options' => array('mps' => 'Meters per second', 'kph' => 'Kilometers per hour', 'mph' => 'Miles per hour'),
+    '#default_value' => variable_get('farm_sensor_arable_speed_unit', $default_units['speed']),
+  );
+
   return system_settings_form($form);
 }
 

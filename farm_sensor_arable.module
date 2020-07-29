@@ -648,3 +648,22 @@ function farm_sensor_arable_sensors() {
 
   return farm_asset_load_multiple($ids);
 }
+
+/**
+ * Helper function to load Arable Sensor Units.
+ */
+function farm_sensor_arable_units() {
+
+  // Load system of measurement.
+  $system = farm_quantity_system_of_measurement();
+  $metric = $system == 'metric';
+
+  // Build defaults based on system of measurement.
+  return array(
+    'temp' => variable_get('farm_sensor_arable_temp_unit', $metric ? 'C' : 'F'),
+    'pres' => variable_get('farm_sensor_arable_pres_unit', 'mb'),
+    'ratio' => variable_get('farm_sensor_arable_ratio_unit', 'pct'),
+    'size' => variable_get('farm_sensor_arable_size_unit', $metric ? 'mm' : 'in'),
+    'speed' => variable_get('farm_sensor_arable_speed_unit', $metric ? 'kph' : 'mph'),
+  );
+}

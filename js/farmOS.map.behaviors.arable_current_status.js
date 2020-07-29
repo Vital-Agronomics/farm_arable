@@ -13,14 +13,27 @@
       Object.values(devices).forEach( device => {
         const apiKey = device.sensor_settings.api_key;
         const deviceName = device.sensor_settings.device.name;
-        promises.push(deviceInfo(apiKey, deviceName));
+
+        // Build promise to query device info and latest data.
+        const data = Promise.all([
+          deviceInfo(apiKey, deviceName),
+          latestDeviceData(apiKey, deviceName)
+        ])
+          .then(data => { return {'info': data[0], 'data': data[1]} });
+
+        // Add promise to list of promises.
+        promises.push(data);
       });
 
       Promise.all(promises).then(devices => {
 
         // Build list of features.
         let features = [];
-        devices.forEach(info => {
+        devices.forEach(device => {
+
+          // Save values from API responses.
+          const info = device.info;
+          const data = device.data;
 
           // Check if location info exists.
           if (info.current_location && info.current_location.gps) {
@@ -41,17 +54,53 @@
             }
             description += '</p>';
 
-            // Add description HTML to geojson properties.
-            info.description = description;
-
             // Add to list of features.
             features.push({
               type: "Feature",
               geometry: {type: "Point", coordinates: [gps[0], gps[1]]},
-              properties: info,
+              properties: {name: info.name, description, info, data},
             });
           }
         });
+
+        // SVG template.
+        const iconTemplate = '<svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" x="0px" y="0px" viewBox="0 0 100 100"><polygon fill="#ffed91" points="12.5,5 12.5,80 35,80 50,95 65,80 87.5,80 87.5,5 "></polygon><text x="50" y="50" font-size="30" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="dark-grey">${text}</text></svg>';
+
+        var styleCache = {};
+        function styleFunction (feature, resolution, style) {
+
+          // Get feature data.
+          const data = feature.get('data', {});
+
+          // Build a text value.
+          let text_value = '--';
+
+          // Check if temp data is available.
+          if (data.tair) {
+            text_value = Math.round(data.tair) + '&#176;';
+          }
+
+          // Return from style cache if exists.
+          if (styleCache[text_value]) {
+            return styleCache[text_value];
+          }
+
+          // Build icon svg.
+          const iconSvg = iconTemplate.replace('${text}', text_value);
+
+          // Build style.
+          const iconStyle = new style.Style({
+            image: new style.Icon({
+              opacity: 1,
+              src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg),
+            })
+          });
+
+          // Save style to cache.
+          styleCache[text_value] = iconStyle;
+
+          return iconStyle;
+        }
 
         // Assemble all features into one geojson.
         const geojson = {
@@ -64,6 +113,7 @@
           title: 'Arable Sensors',
           color: 'yellow',
           geojson,
+          styleFunction,
         };
         instance.addLayer('geojson', opts);
       })
@@ -85,5 +135,27 @@
       }
     })
       .then(response => response.json());
+  }
+
+  // Helper function to load latest device info.
+  function latestDeviceData(apiKey, deviceName) {
+
+    // Hourly API data endpoint.
+    let url = new URL('https://api.arable.cloud/api/v2/data/hourly');
+
+    // Add params.
+    url.searchParams.append('device', deviceName);
+    url.searchParams.append('limit', '1');
+    url.searchParams.append('order', 'desc');
+
+    return fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Apikey ' + apiKey,
+      },
+    })
+      .then(response => response.json())
+      .then(data => data.length ? data[0] : {});
   }
 }(jQuery));

@@ -30,10 +30,14 @@ map and dashboard map.
     - Devices Not Syncing (`Inactive` vs `Dormant`)
     - Battery (`<29%`, `30-59%`, `>60%`)
 
-# Maintainers:
+## Maintainers:
 
 Current maintainers:
 - Paul Weidner (paul121) - https://github.com/paul121
+
+## Sponsors:
+
+- Vital Agronomics - https://vital-agronomics.com/
 
 [Arable Mark]: https://shop.arable.com/
 [farmOS]: https://github.com/farmos/farmos

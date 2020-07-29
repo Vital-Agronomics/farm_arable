@@ -25,6 +25,10 @@ function farm_sensor_arable_farm_map_view($name, $element) {
 
     // Load all arable sensors.
     $sensors = farm_sensor_arable_sensors();
-    farm_map_add_behavior('arable_current_status', array('devices' => $sensors));
+
+    // Load arable units.
+    $units = farm_sensor_arable_units();
+
+    farm_map_add_behavior('arable_current_status', array('devices' => $sensors, 'units' => $units));
   }
 }

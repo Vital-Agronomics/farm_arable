@@ -3,6 +3,7 @@
     attach: function (instance) {
 
       const devices = Drupal.settings.farm_map.behaviors.arable_current_status.devices;
+      const units = Drupal.settings.farm_map.behaviors.arable_current_status.units;
 
       // Bail if no devices were provided.
       if (!devices) {
@@ -17,7 +18,7 @@
         // Build promise to query device info and latest data.
         const data = Promise.all([
           deviceInfo(apiKey, deviceName),
-          latestDeviceData(apiKey, deviceName)
+          latestDeviceData(apiKey, deviceName, units)
         ])
           .then(data => { return {'info': data[0], 'data': data[1]} });
 
@@ -138,7 +139,7 @@
   }
 
   // Helper function to load latest device info.
-  function latestDeviceData(apiKey, deviceName) {
+  function latestDeviceData(apiKey, deviceName, units = {}) {
 
     // Hourly API data endpoint.
     let url = new URL('https://api.arable.cloud/api/v2/data/hourly');
@@ -147,6 +148,11 @@
     url.searchParams.append('device', deviceName);
     url.searchParams.append('limit', '1');
     url.searchParams.append('order', 'desc');
+
+    // Add params for configured units.
+    for (let unit of Object.keys(units)) {
+      url.searchParams.append(unit, units[unit]);
+    }
 
     return fetch(url.toString(), {
       method: 'GET',

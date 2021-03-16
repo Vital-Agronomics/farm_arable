@@ -1,6 +1,0 @@
-name = Farm Sensor: Arable
-description = farmOS Integration with Arable Mark sensors.
-core = 7.x
-package = farmOS Contrib
-dependencies[] = farm_sensor
-dependencies[] = farm_quantity

@@ -1,0 +1,13 @@
+{
+    "name": "Vital-Agronomics/farm_arable",
+    "description": "farmOS Integration with Arable Mark sensors.",
+    "type": "drupal-module",
+    "homepage": "https://github.com/vital-agronomics/farm_arable",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Paul Weidner",
+            "email": "paul.weidner@gmail.com"
+        }
+    ]
+}

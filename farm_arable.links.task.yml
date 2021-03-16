@@ -1,0 +1,5 @@
+farm_arable.settings:
+  base_route: farm_settings.settings_page
+  route_name: farm_arable.settings
+  title: 'Arable'
+  weight: 7

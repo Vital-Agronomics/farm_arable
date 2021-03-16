@@ -1,0 +1,7 @@
+farm_arable.settings:
+  path: 'farm/settings/arable'
+  defaults:
+    _form: '\Drupal\farm_arable\Form\ArableSettingsForm'
+    _title: 'Arable settings'
+  requirements:
+    _permission: 'administer farm arable'

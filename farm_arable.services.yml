@@ -1,0 +1,7 @@
+services:
+  farm_arable.arable_client:
+    class: Drupal\farm_arable\ArableClient
+    factory: farm_arable.arable_client_factory:create
+    arguments: ['@config.factory']
+  farm_arable.arable_client_factory:
+    class: Drupal\farm_arable\ArableClientFactory

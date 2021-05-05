@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_arable
+id: arable
+label: Arable
+description: 'Arable Mark data stream'

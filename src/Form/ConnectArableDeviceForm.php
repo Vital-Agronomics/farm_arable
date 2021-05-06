@@ -56,16 +56,30 @@ class ConnectArableDeviceForm extends FormBase {
     $response = $this->arableClient->get('devices', ['query' => ['limit' => 100]]);
     $devices = Json::decode($response->getBody());
 
-    // Display device options.
-    // @todo Filter out devices that have already been added.
+    // Convert to array as select options.
     $device_names = array_column($devices['items'], 'name');
-    $options = array_combine($device_names, $device_names);
-    ksort($options);
+    $device_options = array_combine($device_names, $device_names);
+    ksort($device_options);
+
+    // Load existing device names.
+    $existing_devices = \Drupal::entityTypeManager()->getStorage('data_stream')->loadByProperties([
+      'type' => 'arable',
+    ]);
+    $existing_device_names = array_map(function ($data_stream) {
+      return $data_stream->label();
+    }, $existing_devices);
+
+    // Filter out existing devices from device options.
+    $device_options = array_filter($device_options, function ($device) use ($existing_device_names) {
+      return !in_array($device, $existing_device_names);
+    });
+
+    // Display device options.
     $form['device_name'] = [
       '#type' => 'select',
       '#title' => $this->t('Device name'),
-      '#description' => $this->t('Select the arable device to add. @total_count devices found.', ['@total_count' => count($options)]),
-      '#options' => $options,
+      '#description' => $this->t('Select the Arable device to connect. @total_count devices found. @existing_count already connected.', ['@total_count' => count($device_options), '@existing_count' => count($existing_device_names)]),
+      '#options' => $device_options,
       '#default_value' => $form_state->getValue('device_name'),
       '#required' => TRUE,
       '#ajax' => [

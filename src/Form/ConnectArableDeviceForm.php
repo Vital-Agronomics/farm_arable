@@ -85,6 +85,7 @@ class ConnectArableDeviceForm extends FormBase {
       '#title' => $this->t('Device info'),
       '#prefix' => '<div id="device-info">',
       '#suffix' => '</div>',
+      '#tree' => TRUE,
       '#open' => TRUE,
     ];
     $form['device_info']['info'] = [
@@ -180,25 +181,23 @@ class ConnectArableDeviceForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    // Load the selected device.
-    // @todo Is this necessary to load again?
-    $device_name = $form_state->getValue('device_name');
-    $response = Json::decode($this->arableClient->get("devices/$device_name")->getBody());
-
     // Populate necessary values.
-    $values = [
-      'arable_device_id' => 'id',
-      'arable_device_type' => 'type',
-      'arable_device_model' => 'model',
+    $device_name = $form_state->getValue('device_name');
+    $device_info = $form_state->getValue('device_info');
+    $keys = [
+      'arable_device_id' => 'device_id',
+      'arable_device_type' => 'device_type',
+      'arable_device_model' => 'device_model',
     ];
-    foreach ($values as $form_key => $response_key) {
-      $values[$form_key] = $response[$response_key];
+    $data_stream_values = [];
+    foreach ($keys as $entity_key => $form_key) {
+      $data_stream_values[$entity_key] = $device_info[$form_key];
     }
 
     // Create the new data stream.
-    $values['type'] = 'arable';
-    $values['name'] = $device_name;
-    $data_stream = DataStream::create($values);
+    $data_stream_values['type'] = 'arable';
+    $data_stream_values['name'] = $device_name;
+    $data_stream = DataStream::create($data_stream_values);
     $data_stream->save();
 
     // Create a new sensor asset referencing the data stream.

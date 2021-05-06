@@ -6,3 +6,4 @@ core_version_requirement: ^9
 dependencies:
   - data_stream
   - views
+  - views_geojson

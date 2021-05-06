@@ -66,6 +66,7 @@ class ConnectArableDeviceForm extends FormBase {
       '#title' => $this->t('Device name'),
       '#description' => $this->t('Select the arable device to add. @total_count devices found.', ['@total_count' => count($options)]),
       '#options' => $options,
+      '#default_value' => $form_state->getValue('device_name'),
       '#required' => TRUE,
       '#ajax' => [
         'callback' => [$this, 'loadDevice'],
@@ -83,6 +84,22 @@ class ConnectArableDeviceForm extends FormBase {
       '#prefix' => '<div id="device-info">',
       '#suffix' => '</div>',
     ];
+
+    $form['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Create'),
+      '#states' => [
+        'disabled' => [
+          ':input[name="device_name"]' => ['value' => ''],
+        ],
+      ],
+    ];
+
+    // Load the selected device.
+    $device_name = $form_state->getValue('device_name');
+    if (empty($device_name)) {
+      return $form;
+    }
 
     $form['device_info']['device_id'] = [
       '#type' => 'textfield',
@@ -114,18 +131,21 @@ class ConnectArableDeviceForm extends FormBase {
       '#disabled' => TRUE,
     ];
 
+    // Populate various values into disabled form fields.
+    $response = Json::decode($this->arableClient->request('GET', "devices/$device_name")->getBody());
+    $values = [
+      'device_id' => 'id',
+      'device_type' => 'type',
+      'device_model' => 'model',
+      'device_state' => 'state',
+      'last_seen' => 'last_seen',
+    ];
+    foreach ($values as $form_key => $response_key) {
+      $form['device_info'][$form_key]['#value'] = $response[$response_key];
+    }
+
     // @todo Display device "has_bridge".
     // @todo Display device sensors.
-
-    $form['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Create'),
-      '#states' => [
-        'disabled' => [
-          ':input[name="device_name"]' => ['value' => ''],
-        ],
-      ],
-    ];
 
     return $form;
   }
@@ -142,25 +162,6 @@ class ConnectArableDeviceForm extends FormBase {
    *   The form elements to replace.
    */
   public function loadDevice(array &$form, FormStateInterface $form_state) {
-
-    // Load the selected device.
-    if ($device_name = $form_state->getValue('device_name')) {
-      $response = Json::decode($this->arableClient->get("devices/$device_name")->getBody());
-
-      // Populate various values into disabled form fields.
-      $values = [
-        'device_id' => 'id',
-        'device_type' => 'type',
-        'device_model' => 'model',
-        'device_state' => 'state',
-        'last_seen' => 'last_seen',
-      ];
-      foreach ($values as $form_key => $response_key) {
-        $form_state->setValue($form_key, $response[$response_key]);
-        $form['device_info'][$form_key]['#value'] = $response[$response_key];
-      }
-    }
-
     // Replace the device info wrapper.
     return $form['device_info'];
   }

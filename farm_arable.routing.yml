@@ -12,3 +12,36 @@ farm_arable.connect_arable_device_form:
     _title: 'Connect Arable device'
   requirements:
     _permission: 'administer farm arable'
+farm_arable.arable_api:
+  path: 'arable/api/{arg1}/{arg2}/{arg3}'
+  defaults:
+    _controller: Drupal\farm_arable\Controller\ArableApiController::api
+    arg2: ''
+    arg3: ''
+  requirements:
+    _permission: 'administer farm arable'
+farm_arable.asset_arable_device_info:
+  path: 'asset/{asset}/arable/device/{meta}'
+  defaults:
+    _controller: Drupal\farm_arable\Controller\ArableApiController::assetDeviceInfo
+    meta: ''
+  requirements:
+    asset: \d+
+    _entity_access: asset.view
+    _entity_bundles: asset:sensor
+  options:
+    parameters:
+      asset:
+        type: entity:asset
+farm_arable.asset_arable_device_data:
+  path: 'asset/{asset}/arable/data/{table}'
+  defaults:
+    _controller: Drupal\farm_arable\Controller\ArableApiController::assetDeviceData
+  requirements:
+    asset: \d+
+    _entity_access: asset.view
+    _entity_bundles: asset:sensor
+  options:
+    parameters:
+      asset:
+        type: entity:asset

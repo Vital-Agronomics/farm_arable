@@ -79,10 +79,16 @@ class ConnectArableDeviceForm extends FormBase {
       ],
     ];
 
+    // Start a device info details element.
     $form['device_info'] = [
-      '#type' => 'container',
+      '#type' => 'details',
+      '#title' => $this->t('Device info'),
       '#prefix' => '<div id="device-info">',
       '#suffix' => '</div>',
+      '#open' => TRUE,
+    ];
+    $form['device_info']['info'] = [
+      '#markup' => $this->t('Select an Arable device to load its info before connecting to farmOS.')
     ];
 
     $form['submit'] = [
@@ -100,6 +106,9 @@ class ConnectArableDeviceForm extends FormBase {
     if (empty($device_name)) {
       return $form;
     }
+
+    // Remove the info message.
+    unset($form['device_info']['info']);
 
     $form['device_info']['device_id'] = [
       '#type' => 'textfield',

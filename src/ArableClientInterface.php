@@ -11,4 +11,12 @@ use GuzzleHttp\ClientInterface;
  */
 interface ArableClientInterface extends ClientInterface {
 
+  /**
+   * Helper function to return the configured default Arable units.
+   *
+   * @return array
+   *   An array of unit configuration.
+   */
+  public static function getDefaultUnits(): array;
+
 }

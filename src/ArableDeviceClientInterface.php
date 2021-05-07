@@ -40,10 +40,12 @@ interface ArableDeviceClientInterface extends ArableClientInterface {
    *   The data table.
    * @param array $options
    *   Optional request options.
+   * @param bool $default_units
+   *   A boolean indicating if default units should be used. Defaults to TRUE.
    *
    * @return \Psr\Http\Message\ResponseInterface
    *   The API response.
    */
-  public function getDeviceData(string $table, array $options = []): ResponseInterface;
+  public function getDeviceData(string $table, array $options = [], bool $default_units = TRUE): ResponseInterface;
 
 }

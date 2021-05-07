@@ -39,10 +39,23 @@ class ArableDeviceClient extends ArableClient implements ArableDeviceClientInter
   /**
    * {@inheritdoc}
    */
-  public function getDeviceData(string $table, array $options = []): ResponseInterface {
+  public function getDeviceData(string $table, array $options = [], bool $default_units = TRUE): ResponseInterface {
+
+    // Build query params.
+    $query = [
+      'device' => $this->dataStream->label(),
+    ];
+
+    // Optionally include default units.
+    if ($default_units) {
+      $query += static::getDefaultUnits();
+    }
+
+    // Override defaults with requested options.
+    $request_options = array_replace_recursive(['query' => $query], $options);
+
     $path = "data/$table";
-    $options['query']['device'] = $this->dataStream->label();
-    return $this->get($path, $options);
+    return $this->get($path, $request_options);
   }
 
   /**

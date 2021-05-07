@@ -41,4 +41,11 @@ class ArableClient extends Client implements ArableClientInterface {
     parent::__construct($config);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function getDefaultUnits(): array {
+    return \Drupal::config('farm_arable.settings')->get('units') ?? [];
+  }
+
 }

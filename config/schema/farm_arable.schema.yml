@@ -6,3 +6,24 @@ farm_arable.settings:
       type: string
       label: 'Default Arable API Key'
       description: 'The default API key used when creating Arable sensor assets.'
+    units:
+      type: mapping
+      label: 'Default Arable data units'
+      description: 'The default units to use when requesting data from the Arable API.'
+      mapping:
+        temp:
+          type: string
+          label: 'Temperature unit'
+        pres:
+          type: string
+          label: 'Pressure unit'
+        ratio:
+          type: string
+          label: 'Ratios unit'
+        size:
+          type: string
+          label: 'Size unit'
+        speed:
+          type: string
+          label: 'Speed unit'
+

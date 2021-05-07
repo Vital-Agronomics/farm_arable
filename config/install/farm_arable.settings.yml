@@ -1,1 +1,8 @@
 default_api_key: ''
+units:
+  temp: 'c'
+  pres: 'mb'
+  ratio: 'pct'
+  size: 'mm'
+  speed: 'mps'
+

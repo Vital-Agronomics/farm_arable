@@ -179,7 +179,14 @@ class ArableApiController extends ControllerBase {
       }
     }
 
+    // Add cache metadata as a dependency.
     $response->addCacheableDependency($cache_data);
+
+    // Add the X-Farm-Arable-Expires header.
+    $max_age = $response->getCacheableMetadata()->getCacheMaxAge();
+    $now = \Drupal::time()->getCurrentTime();
+    $response->headers->set('X-Farm-Arable-Expires', $now + $max_age);
+
     return $response;
   }
 

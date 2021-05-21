@@ -300,7 +300,6 @@ class ConnectArableDeviceForm extends FormBase {
     $device_name = $form_state->getValue('device_name');
     $device_info = $form_state->getValue('device_info');
     $keys = [
-      'arable_device_id' => 'device_id',
       'arable_device_type' => 'device_type',
       'arable_device_model' => 'device_model',
     ];
@@ -312,6 +311,7 @@ class ConnectArableDeviceForm extends FormBase {
     // Create the new data stream.
     $data_stream_values['type'] = 'arable';
     $data_stream_values['name'] = $device_name;
+    $data_stream_values['arable_device_name'] = $device_name;
     $data_stream = DataStream::create($data_stream_values);
     $data_stream->save();
 

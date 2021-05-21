@@ -70,9 +70,9 @@ class Arable extends DataStreamTypeBase {
       ]);
     $fields['arable_api_key'] = $field;
 
-    // Define the arable_device_id field.
+    // Define the arable_device_name field.
     $field = BundleFieldDefinition::create('string')
-      ->setLabel($this->t('Device ID'))
+      ->setLabel($this->t('Device name'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 255)
       ->setSetting('text_processing', 0)
@@ -84,7 +84,7 @@ class Arable extends DataStreamTypeBase {
         'type' => 'string',
         'weight' => -10,
       ]);
-    $fields['arable_device_id'] = $field;
+    $fields['arable_device_name'] = $field;
 
     // Define the arable_device_type field.
     $field = BundleFieldDefinition::create('list_string')

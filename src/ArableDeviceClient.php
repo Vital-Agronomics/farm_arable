@@ -43,7 +43,7 @@ class ArableDeviceClient extends ArableClient implements ArableDeviceClientInter
 
     // Build query params.
     $query = [
-      'device' => $this->dataStream->label(),
+      'device' => $this->dataStream->get('arable_device_name')->value,
     ];
 
     // Optionally include default units.
@@ -65,7 +65,7 @@ class ArableDeviceClient extends ArableClient implements ArableDeviceClientInter
    *   The device path.
    */
   protected function getDevicePath() {
-    return "devices/" . $this->dataStream->label();
+    return "devices/" . $this->dataStream->get('arable_device_name')->value;
   }
 
 }

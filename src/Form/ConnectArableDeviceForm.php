@@ -3,6 +3,7 @@
 namespace Drupal\farm_arable\Form;
 
 use Drupal\asset\Entity\Asset;
+use Drupal\asset\Entity\AssetInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
@@ -283,6 +284,23 @@ class ConnectArableDeviceForm extends FormBase {
       ],
     ];
 
+    // If the device is located in an existing asset geometry, prepopulate it.
+    if (!empty($gps)) {
+      $auto_populate_locations = $this->getDeviceLocation($gps);
+      if (!empty($auto_populate_locations)) {
+
+        // Reset the user input.
+        $user_input = $form_state->getUserInput();
+        unset($user_input['device_info']['location']['asset_location_reference']);
+        $form_state->setUserInput($user_input);
+
+        // Set the location to the first item in the array.
+        $target = reset($auto_populate_locations);
+        $form['device_info']['location']['asset_location_reference']['#default_value'] = $target;
+      }
+    }
+
+
     // @todo Display device "has_bridge".
     // @todo Display device sensors.
 
@@ -376,6 +394,35 @@ class ConnectArableDeviceForm extends FormBase {
       ':asset_uri' => $sensor->toUrl()->setAbsolute()->toString(),
       '%asset_label' => $sensor->label(),
     ]));
+  }
+
+  /**
+   * Helper function to load location assets covering the devices reported GPS.
+   *
+   * @todo Support non-fixed assets.
+   *
+   * @param array $gps
+   *   Array of device GPS data as returned from the Arable API.
+   *
+   * @return AssetInterface[]
+   *   Assets that cover the device's GPS.
+   */
+  protected function getDeviceLocation(array $gps): array {
+
+    // Query for location assets covering the GPS location.
+    $asset_storage = $this->entityTypeManager->getStorage('asset');
+    $asset_ids = $asset_storage->getQuery()
+      ->condition('status', 'active')
+      ->condition('is_fixed', TRUE)
+      ->condition('is_location', TRUE)
+      ->condition('intrinsic_geometry.bottom', $gps[1], '<=')
+      ->condition('intrinsic_geometry.top', $gps[1], '>=')
+      ->condition('intrinsic_geometry.left', $gps[0], '<=')
+      ->condition('intrinsic_geometry.right', $gps[0], '>=')
+      ->execute();
+
+    // Load and return the assets.
+    return $asset_storage->loadMultiple($asset_ids);
   }
 
 }

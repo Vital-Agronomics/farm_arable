@@ -4,6 +4,6 @@ type: module
 package: farmOS Contrib
 core_version_requirement: ^9
 dependencies:
-  - data_stream
+  - farm_sensor
   - views
   - views_geojson

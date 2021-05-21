@@ -68,8 +68,22 @@ class ConnectArableDeviceForm extends FormBase {
 
     // Load all arable devices.
     // @todo Use pagination.
-    $response = $this->arableClient->get('devices', ['query' => ['limit' => 100]]);
+    $response = $this->arableClient->request('GET', 'devices', ['query' => ['limit' => 100]]);
+
+    // Bail if can't connect.
+    if ($response->getStatusCode() != 200) {
+      $this->messenger()->addWarning($this->t('Could not load devices. Check that the Arable API key is valid. Reason: %reason', ['%reason' => $response->getReasonPhrase()]));
+      return [];
+    }
+
+    // Get devices.
     $devices = Json::decode($response->getBody());
+
+    // Bail if no devices were found.
+    if (empty($devices['items'])) {
+      $this->messenger()->addWarning($this->t('No devices were found. Make sure the Arable API key as access to 1 or more Arable devices.'));
+      return [];
+    }
 
     // Convert to array as select options.
     $device_names = array_column($devices['items'], 'name');

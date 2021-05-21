@@ -154,6 +154,13 @@ class ConnectArableDeviceForm extends FormBase {
     // Remove the info message.
     unset($form['device_info']['info']);
 
+    $form['device_info']['sensor_name'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Sensor name'),
+      '#description' => $this->t('The name to use for the sensor asset. Defaults to the Device Name or the Device Location if set.'),
+      '#default_value' => $device_name,
+    ];
+
     $form['device_info']['device_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Device ID'),
@@ -207,6 +214,13 @@ class ConnectArableDeviceForm extends FormBase {
 
     // Current location name.
     $current_location = $response['current_location']['name'] ?? '';
+
+    // Update the default sensor name.
+    if (!empty($current_location)) {
+      $form['device_info']['sensor_name']['#default_value'] = $current_location;
+    }
+
+    // Display the current location name.
     $form['device_info']['location']['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Current location Name'),
@@ -310,15 +324,16 @@ class ConnectArableDeviceForm extends FormBase {
 
     // Create the new data stream.
     $data_stream_values['type'] = 'arable';
-    $data_stream_values['name'] = $device_name;
+    $data_stream_values['name'] = "Arable $device_name";
     $data_stream_values['arable_device_name'] = $device_name;
     $data_stream = DataStream::create($data_stream_values);
     $data_stream->save();
 
     // Create a new sensor asset referencing the data stream.
+    $sensor_name = $device_info['sensor_name'];
     $sensor = Asset::create([
       'type' => 'sensor',
-      'name' => "Arable $device_name",
+      'name' => $sensor_name,
       'data_stream' => $data_stream,
     ]);
     $sensor->save();

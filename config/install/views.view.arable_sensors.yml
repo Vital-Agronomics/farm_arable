@@ -31,7 +31,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'administer farm arable'
+          perm: 'view any sensor asset'
       cache:
         type: tag
         options: {  }

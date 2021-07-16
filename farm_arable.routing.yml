@@ -20,6 +20,12 @@ farm_arable.arable_api:
     arg3: ''
   requirements:
     _permission: 'administer farm arable'
+farm_arable.location_data:
+  path: 'arable/location/{location_id}/data/{table}'
+  defaults:
+    _controller: Drupal\farm_arable\Controller\ArableApiController::locationData
+  requirements:
+    _access: 'TRUE'
 farm_arable.asset_arable_device_info:
   path: 'asset/{asset}/arable/device/{meta}'
   defaults:

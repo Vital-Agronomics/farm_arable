@@ -83,6 +83,104 @@ class ArableApiController extends ControllerBase {
   }
 
   /**
+   * Load data associated with an arable location.
+   *
+   * @todo abstract the caching pieces to work with the device data endpoint.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The original request.
+   * @param string $location_id
+   *   The location ID.
+   * @param string $table
+   *   The Arable table name.
+   *
+   * @return \Drupal\Core\Cache\CacheableJsonResponse
+   */
+  public function locationData(Request $request, string $location_id, string $table) {
+
+    // First query the Location info.
+    $location_info_response = $this->arableClient->request('GET', "locations/$location_id");
+    if ($location_info_response->getStatusCode() === 200) {
+      $location_info = Json::decode($location_info_response->getBody());
+    }
+
+    // Build params for the location data request.
+    // Include default units.
+    $query = [
+      'location' => $location_id,
+    ];
+    $query += $this->arableClient::getDefaultUnits();
+
+    // Override defaults with requested options.
+    $options = $this->copyRequestParameters($request);
+    $request_options = array_replace_recursive(['query' => $query], $options);
+    $path = "data/$table";
+    $location_data = $this->arableClient->request('GET', $path, $request_options);
+
+    // Init new cacheable metadata with no max age.
+    $cache_data = new CacheableMetadata();
+    $cache_data->setCacheMaxAge(0);
+    $cache_data->addCacheContexts(['url.query_args']);
+
+    // Create a new cacheable json response.
+    $response = CacheableJsonResponse::fromJsonString($location_data->getBody(), $location_data->getStatusCode(), $location_data->getHeaders());
+
+    // If the location data request was successful, cache the response.
+    if ($location_data->getStatusCode() === 200 && !empty($location_info['current_device']['last_post'])) {
+      $now = \Drupal::time()->getCurrentTime();
+
+      // Calculate time since last post.
+      $last_post_date = DateTime::createFromFormat(ArableClient::ISO8601U, $location_info['current_device']['last_post']);
+      $last_post = $last_post_date->getTimestamp();
+      $last_post_diff = $now - $last_post;
+
+      // Check if an end time was provided.
+      $query = $request->query->all();
+      $end_time = $now;
+      if (!empty($query['end_time'])) {
+        $end_date = new DateTime($query['end_time']);
+        $end_time = $end_date->getTimestamp();
+      }
+
+      // Set max age for daily data.
+      // @todo Is "tonight" the best option for this?
+      // Does it depend on the timezone the table is aggregated in?
+      if (strpos($table, 'daily') !== FALSE) {
+        $midnight = (new DateTime())->setTime(24, 0)->getTimestamp();
+        $cache_data->setCacheMaxAge($midnight - $now);
+      }
+
+      // Set max age for hourly data.
+      if (strpos($table, 'hourly') !== FALSE) {
+        // Calculate seconds until the device should refresh.
+        // It should refresh within 60 minutes, after which we want to request
+        // new data. 60 minutes + 2 minutes for delay = 3720 seconds.
+        $until_refresh = 3720 - $last_post_diff;
+
+        // If the last post was over an hour ago, only cache for 5 minues.
+        $max_age = $until_refresh > 0 ? $until_refresh : 300;
+        $cache_data->setCacheMaxAge($max_age);
+      }
+
+      // If the query end time is before the last post then we should
+      // have all the devices data for the time range. Set max cache age.
+      if ($end_time < $last_post) {
+        $cache_data->setCacheMaxAge(static::MAX_DATA_CACHE_AGE);
+      }
+    }
+
+    // Add cache metadata as a dependency.
+    $response->addCacheableDependency($cache_data);
+
+    // Add the X-Farm-Arable-Expires header.
+    $max_age = $response->getCacheableMetadata()->getCacheMaxAge();
+    $now = \Drupal::time()->getCurrentTime();
+    $response->headers->set('X-Farm-Arable-Expires', $now + $max_age);
+
+    return $response;
+  }
+
+  /**
    * @param \Symfony\Component\HttpFoundation\Request $request
    * @param \Drupal\asset\Entity\AssetInterface $asset
    * @param string $meta

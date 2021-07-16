@@ -11,9 +11,9 @@ farm_arable.settings_sub:
   parent_id: farm_arable.settings
   weight: -5
 
-# Arable sensors page view.
-farm_arable.arable_sensors:
-  title: 'Arable sensors'
-  route_name: view.arable_sensors.page
+# Arable locations page view.
+farm_arable.arable_locations:
+  title: 'Arable locations'
+  route_name: view.arable_locations.page
   parent_id: farm_arable.settings
   weight: 5

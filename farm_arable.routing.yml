@@ -5,11 +5,11 @@ farm_arable.settings:
     _title: 'Arable settings'
   requirements:
     _permission: 'administer farm arable'
-farm_arable.connect_arable_device_form:
-  path: 'farm/settings/arable/connect'
+farm_arable.connect_arable_location_form:
+  path: 'farm/settings/arable/location/connect/{location_id}'
   defaults:
-    _form: Drupal\farm_arable\Form\ConnectArableDeviceForm
-    _title: 'Connect Arable device'
+    _form: Drupal\farm_arable\Form\ConnectArableLocationForm
+    _title: 'Connect Arable location'
   requirements:
     _permission: 'administer farm arable'
 farm_arable.arable_api:

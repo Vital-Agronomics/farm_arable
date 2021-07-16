@@ -11,13 +11,6 @@ farm_arable.settings_sub:
   parent_id: farm_arable.settings
   weight: -5
 
-# Arable connect device form.
-farm_arable.connect_device:
-  title: 'Connect device'
-  route_name: farm_arable.connect_arable_device_form
-  parent_id: farm_arable.settings
-  weight: 0
-
 # Arable sensors page view.
 farm_arable.arable_sensors:
   title: 'Arable sensors'

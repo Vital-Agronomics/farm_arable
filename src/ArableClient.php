@@ -12,7 +12,7 @@ class ArableClient extends Client implements ArableClientInterface {
   /**
    * ISO time format used for the device "last_seen" and "last_post" value.
    */
-  const ISO8601U = "Y-m-d\TH:i:s.uO";
+  const ISO8601U = "Y-m-d\TH:i:s.uP";
 
   /**
    * The base URI of the Arable API.

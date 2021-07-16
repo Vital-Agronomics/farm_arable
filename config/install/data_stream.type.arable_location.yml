@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_arable
+id: arable_location
+label: Arable location
+description: 'Arable location data stream'

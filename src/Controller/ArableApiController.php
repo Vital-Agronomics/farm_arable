@@ -153,13 +153,9 @@ class ArableApiController extends ControllerBase {
       // Set max age for hourly data.
       if (strpos($table, 'hourly') !== FALSE) {
         // Calculate seconds until the device should refresh.
-        // It should refresh within 60 minutes, after which we want to request
-        // new data. 60 minutes + 2 minutes for delay = 3720 seconds.
-        $until_refresh = 3720 - $last_post_diff;
-
-        // If the last post was over an hour ago, only cache for 5 minues.
-        $max_age = $until_refresh > 0 ? $until_refresh : 300;
-        $cache_data->setCacheMaxAge($max_age);
+        // It should refresh within 60 minutes, so start requesting new data
+        // 2 minutes before the 60 minute mark.
+        $cache_data->setCacheMaxAge(3480 - $last_post_diff);
       }
 
       // If the query end time is before the last post then we should

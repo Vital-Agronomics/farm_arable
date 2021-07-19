@@ -84,6 +84,13 @@ function farm_arable_views_data() {
     ],
   ];
 
+  $data['farm_arable_locations']['last_post'] = [
+    'title' => t('Last post'),
+    'field' => [
+      'id' => 'date',
+    ],
+  ];
+
   $data['farm_arable_locations']['latitude'] = [
     'title' => t('Latitude'),
     'field' => [

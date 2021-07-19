@@ -162,6 +162,10 @@ class ArableLocations extends QueryPluginBase implements ContainerFactoryPluginI
           }
         }
 
+        if (!empty($row['current_device']['last_post'] && $datetime = DateTime::createFromFormat(ArableClient::ISO8601U, $row['current_device']['last_post']))) {
+          $row['last_post'] = $datetime->getTimestamp();
+        }
+
         // Get longitude and latitude from GPS value.
         if (!empty($row['gps']) && is_array($row['gps'])) {
           $gps = $row['gps'];

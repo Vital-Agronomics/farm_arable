@@ -150,25 +150,27 @@ class ConnectArableLocationForm extends FormBase {
 
       // Load nearby location assets.
       $assets = $this->getLocationAssets($location['gps']);
-      $form['info']['asset'] = [
-        '#type' => 'entity_autocomplete',
-        '#title' => $this->t('Asset'),
-        '#description' => $this->t('What assets does this Arable location describe? This will be pre-populated assets that overlap the location GPS point.'),
-        '#target_type' => 'asset',
-        '#selection_handler' => 'views',
-        '#selection_settings' => [
-          'view' => [
-            'view_name' => 'farm_asset_reference',
-            'display_name' => 'entity_reference',
+      if (!empty($assets)) {
+        $form['info']['asset'] = [
+          '#type' => 'entity_autocomplete',
+          '#title' => $this->t('Asset'),
+          '#description' => $this->t('What assets does this Arable location describe? This will be pre-populated assets that overlap the location GPS point.'),
+          '#target_type' => 'asset',
+          '#selection_handler' => 'views',
+          '#selection_settings' => [
+            'view' => [
+              'view_name' => 'farm_asset_reference',
+              'display_name' => 'entity_reference',
+            ],
+            'match_operator' => 'CONTAINS',
+            'match_limit' => 10,
           ],
-          'match_operator' => 'CONTAINS',
-          'match_limit' => 10,
-        ],
-        '#tags' => TRUE,
-        '#validate_reference' => FALSE,
-        '#maxlength' => 1024,
-        '#default_value' => $assets,
-      ];
+          '#tags' => TRUE,
+          '#validate_reference' => FALSE,
+          '#maxlength' => 1024,
+          '#default_value' => $assets,
+        ];
+      }
     }
 
     // Sensor configuration.

@@ -93,13 +93,13 @@ class ConnectArableLocationForm extends FormBase {
     $location = Json::decode($response->getBody());
 
     // Display the raw location info in a closed details element.
-    $form['raw'] = [
+    $form['metadata'] = [
       '#type' => 'details',
-      '#title' => 'Raw data',
+      '#title' => 'Metadata',
       '#open' => FALSE,
       '#weight' => 100,
     ];
-    $form['raw']['data'] = [
+    $form['metadata']['data'] = [
       '#type' => 'textarea',
       '#disabled' => TRUE,
       '#value' => json_encode($location, JSON_PRETTY_PRINT),

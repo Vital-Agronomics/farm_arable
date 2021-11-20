@@ -74,7 +74,9 @@ class ArableLocation extends DataStreamTypeBase {
         'label' => 'inline',
         'type' => 'string',
         'weight' => 5,
-      ]);
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
     $fields['arable_moisture_capacity'] = $field;
 
     // Moisture Maximum Allowable Depletion.
@@ -87,7 +89,9 @@ class ArableLocation extends DataStreamTypeBase {
         'label' => 'inline',
         'type' => 'string',
         'weight' => 6,
-      ]);
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
     $fields['arable_moisture_mad'] = $field;
 
     // Moisture Permanent Wilting Point.
@@ -100,7 +104,9 @@ class ArableLocation extends DataStreamTypeBase {
         'label' => 'inline',
         'type' => 'string',
         'weight' => 7,
-      ]);
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
     $fields['arable_moisture_pwp'] = $field;
 
     return $fields;

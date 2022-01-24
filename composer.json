@@ -1,5 +1,5 @@
 {
-    "name": "Vital-Agronomics/farm_arable",
+    "name": "vital-agronomics/farm_arable",
     "description": "farmOS Integration with Arable Mark sensors.",
     "type": "drupal-module",
     "homepage": "https://github.com/vital-agronomics/farm_arable",
